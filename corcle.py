@@ -24,6 +24,9 @@ BGCOLOR = DARKTURQUOISE
 DIAMETER = 200
 ARCLENGTH = math.pi/5
 
+# Pit attributes
+PITRADIUS = 50
+
 def main():
 
     global DISPLAYSURF, WINDOWWIDTH, WINDOWHEIGHT
@@ -38,7 +41,10 @@ def main():
     while True:
     
         DISPLAYSURF.fill(BGCOLOR)
+        
+        # Draw game objects
         drawPaddle(arcPos, DIAMETER, ARCLENGTH, WHITE)
+        drawPit(BLACK, PITRADIUS)
     
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -60,6 +66,10 @@ def terminate():
 def drawPaddle(arcPos, diameter, arcLength, color):
     circleRect = ((WINDOWWIDTH - diameter)/2, (WINDOWHEIGHT - diameter)/2, diameter, diameter)
     pygame.draw.arc(DISPLAYSURF, color, circleRect, arcPos, arcPos + arcLength, 5)
+    
+def drawPit(color, radius):
+    pitPos = (WINDOWWIDTH/2, WINDOWHEIGHT/2)
+    pygame.draw.circle(DISPLAYSURF, color, pitPos, radius)
 
 if __name__ == '__main__':
     main()
