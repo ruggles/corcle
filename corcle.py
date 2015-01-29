@@ -22,7 +22,7 @@ BGCOLOR = DARKTURQUOISE
 
 # Arc attributes
 DIAMETER = 200
-ARCLENGTH = math.pi/5
+ARCLENGTH = math.pi/4
 
 # Pit attributes
 PITRADIUS = 50
@@ -34,12 +34,12 @@ def main():
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
-    pygame.display.set_caption('Corcle Panic')
     
     arcPos = 2
     
     while True:
     
+        pygame.display.set_caption('Corcle Panic %f' % FPSCLOCK.get_fps() )
         DISPLAYSURF.fill(BGCOLOR)
         
         # Draw game objects
