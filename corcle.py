@@ -39,12 +39,7 @@ def main():
     
     while True:
     
-        pygame.display.set_caption('Corcle Panic %f' % FPSCLOCK.get_fps() )
-        DISPLAYSURF.fill(BGCOLOR)
-        
-        # Draw game objects
-        drawPaddle(arcPos, DIAMETER, ARCLENGTH, WHITE)
-        drawPit(BLACK, PITRADIUS)
+        # Event Code & Game Logic
     
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -52,10 +47,19 @@ def main():
         
         keys = pygame.key.get_pressed()
         if keys[K_a]:
-            arcPos += math.pi/30
+            arcPos += math.pi/20
         if keys[K_s]:
-            arcPos -= math.pi/30
-                    
+            arcPos -= math.pi/20
+        
+        # Draw Code
+        
+        pygame.display.set_caption('Corcle Panic %f' % FPSCLOCK.get_fps() )
+        DISPLAYSURF.fill(BGCOLOR)
+        drawPit(BLACK, PITRADIUS)
+        drawPaddle(arcPos, DIAMETER, ARCLENGTH, WHITE)
+        
+        # Update Screen & wait for next frame
+        
         pygame.display.update()
         FPSCLOCK.tick(FPS)
     
