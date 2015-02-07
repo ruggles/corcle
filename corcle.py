@@ -29,13 +29,15 @@ PITRADIUS = 50
 
 def main():
 
-    global DISPLAYSURF, WINDOWWIDTH, WINDOWHEIGHT
+    global DISPLAYSURF
 
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
     
     arcPos = 2
+    
+    whitePaddle = paddle(WHITE, DIAMETER, ARCLENGTH, arcPos)
     
     while True:
     
@@ -47,21 +49,40 @@ def main():
         
         keys = pygame.key.get_pressed()
         if keys[K_a]:
-            arcPos += math.pi/20
+            whitePaddle.move(math.pi/20)
         if keys[K_s]:
-            arcPos -= math.pi/20
+            whitePaddle.move(-math.pi/20)
         
         # Draw Code
         
         pygame.display.set_caption('Corcle Panic %f' % FPSCLOCK.get_fps() )
         DISPLAYSURF.fill(BGCOLOR)
         drawPit(BLACK, PITRADIUS)
-        drawPaddle(arcPos, DIAMETER, ARCLENGTH, WHITE)
+        whitePaddle.draw()
         
         # Update Screen & wait for next frame
         
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+
+class paddle(object):
+    
+    def __init__(self, color, diameter, arcLength, arcPos):
+    
+        self.color = color
+        self.diameter = diameter
+        self.arcLength = arcLength
+        self.arcPos = arcPos
+        
+        self.circleRect = ((WINDOWWIDTH - diameter)/2, (WINDOWHEIGHT - diameter)/2, diameter, diameter)
+    
+    def draw(self):
+        
+        pygame.draw.arc(DISPLAYSURF, self.color, self.circleRect, self.arcPos, self.arcPos + self.arcLength, 5)
+        
+    def move(self, arcDelta):
+        
+        self.arcPos = self.arcPos + arcDelta
     
 def terminate():
     pygame.quit()
