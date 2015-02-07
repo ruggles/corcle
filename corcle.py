@@ -6,6 +6,7 @@ corcle.py
 Nicholas Ruggles
 '''
 
+from __future__ import division
 import pygame, sys, math
 from pygame.locals import *
 
@@ -40,6 +41,7 @@ def main():
     
     whitePaddle = paddle(WHITE, PADDIAMETER, PADLENGTH, arcPos)
     blackPit = pit(BLACK, PITRADIUS)
+    whiteDot = dot(WHITE, 10, 300, 0 , 5)
     
     while True:
     
@@ -55,6 +57,8 @@ def main():
         if keys[K_s]:
             whitePaddle.move(-PADSPEED)
         
+        whiteDot.move()
+        
         # Draw Code
         
         pygame.display.set_caption('Corcle Panic %f' % FPSCLOCK.get_fps() )
@@ -62,6 +66,7 @@ def main():
         
         blackPit.draw()
         whitePaddle.draw()
+        whiteDot.draw()
         
         # Update Screen & wait for next frame
         
@@ -94,11 +99,35 @@ class pit(object):
         self.color = color
         self.radius = radius
         
-        self.pitPos = (WINDOWWIDTH/2, WINDOWHEIGHT/2)
+        self.pitPos = (WINDOWWIDTH//2, WINDOWHEIGHT//2)
         
     def draw(self):
         
         pygame.draw.circle(DISPLAYSURF, self.color, self.pitPos, self.radius)
+
+class dot(object):
+    
+    def __init__(self, color, xPos, yPos, direction, speed):
+        
+        self.color = color
+        self.direction = direction
+        self.xPos = xPos
+        self.yPos = yPos
+        self.speed = speed
+        
+        self.dotRect = (self.xPos, self.yPos, 10, 10)
+        
+    def draw(self):
+        
+        pygame.draw.rect(DISPLAYSURF, self.color, self.dotRect)
+        
+    def move(self):
+    
+        self.xPos = self.xPos + self.speed * math.cos(self.direction)
+        self.yPos = self.yPos + self.speed * math.sin(self.direction)
+        
+        self.dotRect = (self.xPos, self.yPos, 10, 10)
+        
 
 def terminate():
     pygame.quit()
