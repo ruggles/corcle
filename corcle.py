@@ -10,7 +10,7 @@ from __future__ import division
 import pygame, sys, math
 from pygame.locals import *
 
-FPS = 60
+FPS = 30
 WINDOWWIDTH = 800
 WINDOWHEIGHT = 600
 
@@ -61,7 +61,7 @@ def main():
         
         # Draw Code
         
-        pygame.display.set_caption('Corcle Panic %f' % FPSCLOCK.get_fps() )
+        pygame.display.set_caption('Corcle Panic %f' % blackPit.collide(whiteDot.getPos()) )
         DISPLAYSURF.fill(BGCOLOR)
         
         blackPit.draw()
@@ -105,6 +105,13 @@ class pit(object):
         
         pygame.draw.circle(DISPLAYSURF, self.color, self.pitPos, self.radius)
 
+    def collide(self, pos):
+        # Returns True if x, y in pit
+        
+        distance = ((pos[0] - self.pitPos[0])**2 + (pos[1] - self.pitPos[1])**2)**0.5
+        
+        return distance < self.radius
+
 class dot(object):
     
     def __init__(self, color, xPos, yPos, direction, speed):
@@ -127,6 +134,10 @@ class dot(object):
         self.yPos = self.yPos + self.speed * math.sin(self.direction)
         
         self.dotRect = (self.xPos, self.yPos, 10, 10)
+        
+    def getPos(self):
+        
+        return (self.xPos, self.yPos)
         
 
 def terminate():
