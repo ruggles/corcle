@@ -25,6 +25,7 @@ BGCOLOR = DARKTURQUOISE
 PADDIAMETER = 200
 PADLENGTH = math.pi/4
 PADSPEED = math.pi/20
+PADWIDTH = 50
 
 # Pit attributes
 PITRADIUS = 50
@@ -37,11 +38,11 @@ def main():
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
     
-    arcPos = 2
+    arcPos = 0
     
-    whitePaddle = paddle(WHITE, PADDIAMETER, PADLENGTH, arcPos)
+    whitePaddle = paddle(WHITE, PADDIAMETER, PADLENGTH, PADWIDTH, arcPos)
     blackPit = pit(BLACK, PITRADIUS)
-    whiteDot = dot(WHITE, 10, 300, 0 , 5)
+    whiteDot = dot(WHITE, 10, 350, 0 , 5)
     
     while True:
     
@@ -61,7 +62,7 @@ def main():
         
         # Draw Code
         
-        pygame.display.set_caption('Corcle Panic %f' % blackPit.collide(whiteDot.getPos()) )
+        pygame.display.set_caption('Corcle Panic %f' % whitePaddle.collide(whiteDot.getPos()) )
         DISPLAYSURF.fill(BGCOLOR)
         
         blackPit.draw()
@@ -75,22 +76,42 @@ def main():
 
 class paddle(object):
     
-    def __init__(self, color, diameter, arcLength, arcPos):
+    def __init__(self, color, diameter, arcLength, arcWidth, arcPos):
     
         self.color = color
         self.diameter = diameter
         self.arcLength = arcLength
+        self.arcWidth = arcWidth
         self.arcPos = arcPos
         
-        self.circleRect = ((WINDOWWIDTH - diameter)/2, (WINDOWHEIGHT - diameter)/2, diameter, diameter)
+        
+        self.circleRect = pygame.Rect((WINDOWWIDTH - diameter)/2, (WINDOWHEIGHT - diameter)/2, diameter, diameter)
     
     def draw(self):
         
-        pygame.draw.arc(DISPLAYSURF, self.color, self.circleRect, self.arcPos, self.arcPos + self.arcLength, 5)
+        pygame.draw.arc(DISPLAYSURF, self.color, self.circleRect, self.arcPos, self.arcPos + self.arcLength, self.arcWidth)
         
     def move(self, arcDelta):
         
         self.arcPos = self.arcPos + arcDelta
+        
+        if self.arcPos > 2*math.pi:
+            self.arcPos -= 2*math.pi
+            
+        if self.arcPos < 0:
+            self.arcPos += 2*math.pi
+        
+    def collide(self, pos):
+        
+        distance = ( (pos[0] - self.circleRect.center[0])**2 + (pos[1] - self.circleRect.center[1])**2 )**0.5
+        
+        if pos[1] < self.circleRect.center[1]:
+            theta = math.atan2( -(pos[1] - self.circleRect.center[1]), (pos[0] - self.circleRect.center[0]) )
+        else:
+            theta = math.pi - math.atan2( -(pos[1] - self.circleRect.center[1]), -(pos[0] - self.circleRect.center[0]) )
+        
+        return (distance < self.diameter/2) and (distance > self.diameter/2 - self.arcWidth) \
+            and (theta > self.arcPos) and (theta < self.arcPos + self.arcLength)
     
 class pit(object):
     
