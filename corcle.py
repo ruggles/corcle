@@ -7,10 +7,10 @@ Nicholas Ruggles
 '''
 
 from __future__ import division
-import pygame, sys, math
+import pygame, sys, math, random
 from pygame.locals import *
 
-FPS = 30
+FPS = 60
 WINDOWWIDTH = 800
 WINDOWHEIGHT = 600
 
@@ -24,8 +24,8 @@ BGCOLOR = DARKTURQUOISE
 # Paddle attributes
 PADDIAMETER = 200
 PADLENGTH = math.pi/4
-PADSPEED = math.pi/20
-PADWIDTH = 50
+PADSPEED = math.pi/22
+PADWIDTH = 5
 
 # Pit attributes
 PITRADIUS = 50
@@ -43,12 +43,13 @@ def main():
     whitePaddle = paddle(WHITE, PADDIAMETER, PADLENGTH, PADWIDTH, arcPos)
     blackPit = pit(BLACK, PITRADIUS)
     
-    dotSpeed = 5
-    whiteDot = spawnDot(WHITE, math.pi , dotSpeed)
+    dotSpeed = 3
+    dotList = []
     
+    frameCount = 0
     while True:
     
-        # Event Code & Game Logic
+        # Event Code
     
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -60,21 +61,36 @@ def main():
         if keys[K_s]:
             whitePaddle.move(-PADSPEED)
         
-        whiteDot.move()
+        # Game Logic
+        if (frameCount%180 == 0):
+            dotList.append(spawnDot(WHITE, random.uniform(0, math.pi*2) , dotSpeed))
+        
+        i = 0
+        for dot in dotList:
+            if whitePaddle.collide(dot.getPos()):
+                dotList.pop(i)
+            elif blackPit.collide(dot.getPos()):
+                terminate()
+            else:
+                dot.move()
+            i += 1
         
         # Draw Code
         
-        pygame.display.set_caption('Corcle Panic %f' % whitePaddle.collide(whiteDot.getPos()) )
+        pygame.display.set_caption('Corcle Panic')
         DISPLAYSURF.fill(BGCOLOR)
         
         blackPit.draw()
         whitePaddle.draw()
-        whiteDot.draw()
-        
+
+        for dot in dotList:
+            dot.draw()
+            
         # Update Screen & wait for next frame
         
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+        frameCount += 1
 
 class paddle(object):
     
@@ -160,7 +176,7 @@ class dot(object):
         
     def getPos(self):
         
-        return (self.xPos, self.yPos)
+        return (self.xPos - 5, self.yPos - 5)
         
 def spawnDot(color, angle, speed):
     #returns dot object positioned at edge of screen, facing center.
