@@ -42,7 +42,9 @@ def main():
     
     whitePaddle = paddle(WHITE, PADDIAMETER, PADLENGTH, PADWIDTH, arcPos)
     blackPit = pit(BLACK, PITRADIUS)
-    whiteDot = dot(WHITE, 10, 350, 0 , 5)
+    
+    dotSpeed = 5
+    whiteDot = spawnDot(WHITE, math.pi , dotSpeed)
     
     while True:
     
@@ -139,8 +141,8 @@ class dot(object):
         
         self.color = color
         self.direction = direction
-        self.xPos = xPos
-        self.yPos = yPos
+        self.xPos = xPos - 5
+        self.yPos = yPos - 5
         self.speed = speed
         
         self.dotRect = (self.xPos, self.yPos, 10, 10)
@@ -160,6 +162,14 @@ class dot(object):
         
         return (self.xPos, self.yPos)
         
+def spawnDot(color, angle, speed):
+    #returns dot object positioned at edge of screen, facing center.
+    
+    x = WINDOWWIDTH//2 + WINDOWHEIGHT*math.cos(angle)
+    y = WINDOWHEIGHT//2 + WINDOWHEIGHT*math.sin(angle)
+    newDot = dot(color, x, y, angle + math.pi, speed)
+    
+    return newDot
 
 def terminate():
     pygame.quit()
