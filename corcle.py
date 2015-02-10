@@ -47,6 +47,7 @@ def main():
     dotList = []
     
     frameCount = 0
+    dotFrequency = 180
     while True:
     
         # Event Code
@@ -62,8 +63,9 @@ def main():
             whitePaddle.move(-PADSPEED)
         
         # Game Logic
-        if (frameCount%180 == 0):
-            dotList.append(spawnDot(WHITE, random.uniform(0, math.pi*2) , dotSpeed))
+        if (frameCount%dotFrequency == 0):
+            dotList.append(spawnDot(WHITE, random.uniform(0.5, math.pi*2 - 0.5) , dotSpeed))
+            dotFrequency -= 1
         
         i = 0
         for dot in dotList:
@@ -77,7 +79,7 @@ def main():
         
         # Draw Code
         
-        pygame.display.set_caption('Corcle Panic')
+        pygame.display.set_caption('Corcle Panic %d' % frameCount)
         DISPLAYSURF.fill(BGCOLOR)
         
         blackPit.draw()
@@ -120,6 +122,8 @@ class paddle(object):
             self.arcPos += 2*math.pi
         
     def collide(self, pos):
+        
+        # NOTE: Doesn't detect collisions for dot theta close to zero
         
         distance = ( (pos[0] - self.circleRect.center[0])**2 + (pos[1] - self.circleRect.center[1])**2 )**0.5
         
