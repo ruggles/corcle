@@ -22,13 +22,13 @@ WHITE =         (255, 255, 255)
 BGCOLOR = DARKTURQUOISE
 
 # Paddle attributes
-PADDIAMETER = 200
-PADLENGTH = math.pi/4
+PADDIAMETER = 150
+PADLENGTH = math.pi/3
 PADSPEED = math.pi/22
 PADWIDTH = 5
 
 # Pit attributes
-PITRADIUS = 50
+PITRADIUS = 25
 
 def main():
 
@@ -41,6 +41,7 @@ def main():
     arcPos = 0
     
     whitePaddle = paddle(WHITE, PADDIAMETER, PADLENGTH, PADWIDTH, arcPos)
+    blackPaddle = paddle(BLACK, PADDIAMETER, PADLENGTH, PADWIDTH, arcPos)
     blackPit = pit(BLACK, PITRADIUS)
     
     dotSpeed = 3
@@ -61,6 +62,11 @@ def main():
             whitePaddle.move(PADSPEED)
         if keys[K_s]:
             whitePaddle.move(-PADSPEED)
+            
+        if keys[K_k]:
+            blackPaddle.move(PADSPEED)
+        if keys[K_l]:
+            blackPaddle.move(-PADSPEED)
         
         # Game Logic
         if (frameCount%dotFrequency == 0):
@@ -70,7 +76,16 @@ def main():
         i = 0
         for dot in dotList:
             if whitePaddle.collide(dot.getPos()):
-                dotList.pop(i)
+                if (whitePaddle.getColor() == dot.getColor()):
+                    dotList.pop(i)
+                else:
+                    terminate()
+            elif blackPaddle.collide(dot.getPos()):
+                if (blackPaddle.getColor() == dot.getColor()):
+                    dotList.pop(i)
+                else:
+                    terminate()
+
             elif blackPit.collide(dot.getPos()):
                 terminate()
             else:
@@ -84,6 +99,7 @@ def main():
         
         blackPit.draw()
         whitePaddle.draw()
+        blackPaddle.draw()
 
         for dot in dotList:
             dot.draw()
@@ -134,6 +150,10 @@ class paddle(object):
         
         return (distance < self.diameter/2) and (distance > self.diameter/2 - self.arcWidth) \
             and (theta > self.arcPos) and (theta < self.arcPos + self.arcLength)
+            
+    def getColor(self):
+        
+        return self.color
     
 class pit(object):
     
@@ -181,6 +201,10 @@ class dot(object):
     def getPos(self):
         
         return (self.xPos - 5, self.yPos - 5)
+        
+    def getColor(self):
+        
+        return self.color
         
 def spawnDot(color, angle, speed):
     #returns dot object positioned at edge of screen, facing center.
