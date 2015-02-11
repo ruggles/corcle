@@ -41,7 +41,7 @@ def main():
     arcPos = 0
     
     whitePaddle = paddle(WHITE, PADDIAMETER, PADLENGTH, PADWIDTH, arcPos)
-    blackPaddle = paddle(BLACK, PADDIAMETER, PADLENGTH, PADWIDTH, arcPos)
+    blackPaddle = paddle(BLACK, PADDIAMETER + PADWIDTH*2, PADLENGTH, PADWIDTH, arcPos)
     blackPit = pit(BLACK, PITRADIUS)
     
     dotSpeed = 3
@@ -70,7 +70,7 @@ def main():
         
         # Game Logic
         if (frameCount%dotFrequency == 0):
-            dotList.append(spawnDot(WHITE, random.uniform(0.5, math.pi*2 - 0.5) , dotSpeed))
+            dotList.append(spawnDot(random.choice((WHITE, BLACK)), random.uniform(0.5, math.pi*2 - 0.5) , dotSpeed))
             dotFrequency -= 1
         
         i = 0
