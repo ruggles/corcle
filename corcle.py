@@ -70,8 +70,8 @@ def main():
         if (frameCount%dotFrequency == 0):
             firstSpawn = random.uniform(0, math.pi*2)
             dotList.append(spawnDot(WHITE, firstSpawn , dotSpeed))
-            dotList.append(spawnDot(BLACK, firstSpawn + random.uniform(PADLENGTH, math.pi*2), dotSpeed))
-            dotFrequency -= 1
+            dotList.append(spawnDot(BLACK, firstSpawn + random.uniform(PADLENGTH, math.pi*2 - PADLENGTH), dotSpeed))
+            dotFrequency = int(180 - 2*(frameCount**0.5))
         
         i = 0
         for dot in dotList:
