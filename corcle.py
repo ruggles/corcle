@@ -38,13 +38,11 @@ def main():
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
     
-    arcPos = 0
-    
-    whitePaddle = paddle(WHITE, PADDIAMETER, PADLENGTH, PADWIDTH, arcPos)
-    blackPaddle = paddle(BLACK, PADDIAMETER + PADWIDTH*2, PADLENGTH, PADWIDTH, arcPos)
+    whitePaddle = paddle(WHITE, PADDIAMETER, PADLENGTH, PADWIDTH, 0)
+    blackPaddle = paddle(BLACK, PADDIAMETER + PADWIDTH*2, PADLENGTH, PADWIDTH, math.pi)
     blackPit = pit(BLACK, PITRADIUS)
     
-    dotSpeed = 3
+    dotSpeed = 2
     dotList = []
     
     frameCount = 0
@@ -70,7 +68,9 @@ def main():
         
         # Game Logic
         if (frameCount%dotFrequency == 0):
-            dotList.append(spawnDot(random.choice((WHITE, BLACK)), random.uniform(0.5, math.pi*2 - 0.5) , dotSpeed))
+            firstSpawn = random.uniform(0, math.pi*2)
+            dotList.append(spawnDot(WHITE, firstSpawn , dotSpeed))
+            dotList.append(spawnDot(BLACK, firstSpawn + random.uniform(PADLENGTH, math.pi*2), dotSpeed))
             dotFrequency -= 1
         
         i = 0
