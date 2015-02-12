@@ -38,15 +38,17 @@ def main():
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
     
-    whitePaddle = paddle(WHITE, PADDIAMETER, PADLENGTH, PADWIDTH, 0)
-    blackPaddle = paddle(BLACK, PADDIAMETER + PADWIDTH*2, PADLENGTH, PADWIDTH, math.pi)
+    whitePaddle = paddle(WHITE, PADDIAMETER, PADLENGTH, PADWIDTH, math.pi)
+    blackPaddle = paddle(BLACK, PADDIAMETER + PADWIDTH*2, PADLENGTH, PADWIDTH, 0)
     blackPit = pit(BLACK, PITRADIUS)
     
     dotSpeed = 2
     dotList = []
     
     frameCount = 0
-    dotFrequency = 180
+    baseSpawnFreq = 180
+    spawnFreq = baseSpawnFreq
+    
     while True:
     
         # Event Code
@@ -67,11 +69,11 @@ def main():
             blackPaddle.move(-PADSPEED)
         
         # Game Logic
-        if (frameCount%dotFrequency == 0):
+        if (frameCount%spawnFreq == 0):
             firstSpawn = random.uniform(0, math.pi*2)
             dotList.append(spawnDot(WHITE, firstSpawn , dotSpeed))
             dotList.append(spawnDot(BLACK, firstSpawn + random.uniform(PADLENGTH, math.pi*2 - PADLENGTH), dotSpeed))
-            dotFrequency = int(180 - 2*(frameCount**0.5))
+            spawnFreq = int(baseSpawnFreq - (frameCount**0.5))
         
         i = 0
         for dot in dotList:
@@ -120,6 +122,10 @@ class paddle(object):
         self.arcWidth = arcWidth
         self.arcPos = arcPos
         
+        if self.arcPos > 2*math.pi:
+            self.arcPos -= 2*math.pi
+        if self.arcPos < 0:
+            self.arcPos += 2*math.pi
         
         self.circleRect = pygame.Rect((WINDOWWIDTH - diameter)/2, (WINDOWHEIGHT - diameter)/2, diameter, diameter)
     
@@ -139,14 +145,12 @@ class paddle(object):
         
     def collide(self, pos):
         
-        # NOTE: Doesn't detect collisions for dot theta close to zero
-        
         distance = ( (pos[0] - self.circleRect.center[0])**2 + (pos[1] - self.circleRect.center[1])**2 )**0.5
         
-        if pos[1] < self.circleRect.center[1]:
-            theta = math.atan2( -(pos[1] - self.circleRect.center[1]), (pos[0] - self.circleRect.center[0]) )
-        else:
-            theta = math.pi - math.atan2( -(pos[1] - self.circleRect.center[1]), -(pos[0] - self.circleRect.center[0]) )
+        theta = getAngle(pos)
+        
+        if (theta < self.arcLength) and (self.arcPos + self.arcLength > 2*math.pi) :
+            theta += 2*math.pi
         
         return (distance < self.diameter/2) and (distance > self.diameter/2 - self.arcWidth) \
             and (theta > self.arcPos) and (theta < self.arcPos + self.arcLength)
@@ -193,14 +197,14 @@ class dot(object):
         
     def move(self):
     
-        self.xPos = self.xPos + self.speed * math.cos(self.direction)
-        self.yPos = self.yPos + self.speed * math.sin(self.direction)
+        self.xPos = self.xPos - self.speed * math.cos(self.direction)
+        self.yPos = self.yPos - self.speed * math.sin(self.direction)
         
         self.dotRect = (self.xPos, self.yPos, 10, 10)
         
     def getPos(self):
         
-        return (self.xPos - 5, self.yPos - 5)
+        return (self.xPos + 5, self.yPos + 5)
         
     def getColor(self):
         
@@ -210,10 +214,28 @@ def spawnDot(color, angle, speed):
     #returns dot object positioned at edge of screen, facing center.
     
     x = WINDOWWIDTH//2 + WINDOWHEIGHT*math.cos(angle)
-    y = WINDOWHEIGHT//2 + WINDOWHEIGHT*math.sin(angle)
-    newDot = dot(color, x, y, angle + math.pi, speed)
+    y = WINDOWHEIGHT//2 - WINDOWHEIGHT*math.sin(angle)
+    newDot = dot(color, x, y, -angle, speed)
     
     return newDot
+    
+def getAngle(pos):
+    '''
+    Gets angle from center of screen
+    '''
+    
+    # Get coords relative to center
+    x = pos[0] - WINDOWWIDTH//2
+    y = pos[1] - WINDOWHEIGHT//2
+    
+    if y < 0:
+        angle = math.atan2(-y, x)
+    else:
+        angle = math.pi - math.atan2(-y, -x)
+    
+    return angle
+    
+    
 
 def terminate():
     pygame.quit()
