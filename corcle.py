@@ -30,6 +30,10 @@ PADWIDTH = 5
 # Pit attributes
 PITRADIUS = 25
 
+# Dot attributes
+DOTSPEED = 2
+BASEFREQ = 180
+
 def main():
 
     global DISPLAYSURF
@@ -42,12 +46,9 @@ def main():
     blackPaddle = paddle(BLACK, PADDIAMETER + PADWIDTH*2, PADLENGTH, PADWIDTH, 0)
     blackPit = pit(BLACK, PITRADIUS)
     
-    dotSpeed = 2
     dotList = []
     
     frameCount = 0
-    baseSpawnFreq = 180
-    spawnFreq = baseSpawnFreq
     
     while True:
     
@@ -68,13 +69,13 @@ def main():
         if keys[K_l]:
             blackPaddle.move(-PADSPEED)
         
-        # Game Logic
-        if (frameCount%spawnFreq == 0):
-            firstSpawn = random.uniform(0, math.pi*2)
-            dotList.append(spawnDot(WHITE, firstSpawn , dotSpeed))
-            dotList.append(spawnDot(BLACK, firstSpawn + random.uniform(PADLENGTH, math.pi*2 - PADLENGTH), dotSpeed))
-            spawnFreq = int(baseSpawnFreq - (frameCount**0.5))
+        # Dot spawning functions either return None, or a list of dot objects
+        newDotList = spawnSimultaneous(frameCount)
+        if newDotList != None:
+            for dot in newDotList:
+                dotList.append(dot)
         
+        # Collision Code
         i = 0
         for dot in dotList:
             if whitePaddle.collide(dot.getPos()):
@@ -233,13 +234,23 @@ def getAngle(pos):
     else:
         angle = math.pi - math.atan2(-y, -x)
     
-    return angle
-    
-    
+    return angle    
 
 def terminate():
     pygame.quit()
     sys.exit()
+    
+def spawnSimultaneous(frameCount):
+    # if 
+    newDotList = []
 
+    if (frameCount%int(BASEFREQ - (frameCount**0.5)) == 0):
+        firstSpawn = random.uniform(0, math.pi*2)
+        newDotList.append(spawnDot(WHITE, firstSpawn , DOTSPEED))
+        newDotList.append(spawnDot(BLACK, firstSpawn + random.uniform(PADLENGTH, math.pi*2 - PADLENGTH), DOTSPEED))
+        return newDotList
+    else:
+        return None
+        
 if __name__ == '__main__':
     main()
