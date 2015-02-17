@@ -19,6 +19,7 @@ DARKTURQUOISE = (  3,  54,  73)
 BLACK =         (  0,   0,   0)
 WHITE =         (255, 255, 255)
 BLUE =          (  0,   0, 255)
+DARKBLUE =      (  0,   0, 127)
 RED =           (255,   0,   0)
 PURPLE =        (255,   0, 255)
 GREEN =         (  0, 255,   0)
@@ -27,6 +28,7 @@ ORANGE =        (255, 127,   0)
 
 BGCOLOR = BLACK
 PITCOLOR = DARKTURQUOISE
+LINECOLOR = DARKBLUE
 COLOR1 = RED
 COLOR2 = GREEN
 
@@ -42,6 +44,8 @@ PITRADIUS = 25
 # Dot attributes
 DOTSPEED = 2
 BASEFREQ = 180
+
+NUMLINES = 200
 
 def main():
 
@@ -106,9 +110,11 @@ def main():
         
         # Draw Code
         
-        pygame.display.set_caption('Corcle Panic %d' % frameCount)
+        pygame.display.set_caption('Corcle %d' % frameCount)
+        
         DISPLAYSURF.fill(BGCOLOR)
         
+        drawRadialLines(LINECOLOR, NUMLINES)
         centerPit.draw()
         firstPaddle.draw()
         secondPaddle.draw()
@@ -260,6 +266,22 @@ def spawnSimultaneous(frameCount):
         return newDotList
     else:
         return None
+        
+def drawRadialLines(color, numLines):
+    # Draws numLines number of lines radiating from center of screen
+    
+    assert numLines > 0
+    
+    lineDiff = 2 * math.pi / numLines
+    center = (WINDOWWIDTH // 2, WINDOWHEIGHT // 2)
+    angle = 0
+    
+    for i in range(numLines) :
+        angle = lineDiff * i
+        endX = center[0] + WINDOWHEIGHT*math.cos(angle)
+        endY = center[1] + WINDOWHEIGHT*math.sin(angle)
+        
+        pygame.draw.line(DISPLAYSURF, color, center, (endX, endY))
         
 if __name__ == '__main__':
     main()
