@@ -18,8 +18,17 @@ WINDOWHEIGHT = 600
 DARKTURQUOISE = (  3,  54,  73)
 BLACK =         (  0,   0,   0)
 WHITE =         (255, 255, 255)
+BLUE =          (  0,   0, 255)
+RED =           (255,   0,   0)
+PURPLE =        (255,   0, 255)
+GREEN =         (  0, 255,   0)
+YELLOW =        (255, 255,   0)
+ORANGE =        (255, 127,   0)
 
-BGCOLOR = DARKTURQUOISE
+BGCOLOR = BLACK
+PITCOLOR = DARKTURQUOISE
+COLOR1 = RED
+COLOR2 = GREEN
 
 # Paddle attributes
 PADDIAMETER = 150
@@ -42,9 +51,9 @@ def main():
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
     
-    whitePaddle = paddle(WHITE, PADDIAMETER, PADLENGTH, PADWIDTH, math.pi)
-    blackPaddle = paddle(BLACK, PADDIAMETER + PADWIDTH*2, PADLENGTH, PADWIDTH, 0)
-    blackPit = pit(BLACK, PITRADIUS)
+    firstPaddle = paddle(COLOR1, PADDIAMETER, PADLENGTH, PADWIDTH, math.pi)
+    secondPaddle = paddle(COLOR2, PADDIAMETER + PADWIDTH*2, PADLENGTH, PADWIDTH, 0)
+    centerPit = pit(PITCOLOR, PITRADIUS)
     
     dotList = []
     
@@ -60,14 +69,14 @@ def main():
         
         keys = pygame.key.get_pressed()
         if keys[K_a]:
-            whitePaddle.move(PADSPEED)
+            firstPaddle.move(PADSPEED)
         if keys[K_s]:
-            whitePaddle.move(-PADSPEED)
+            firstPaddle.move(-PADSPEED)
             
         if keys[K_k]:
-            blackPaddle.move(PADSPEED)
+            secondPaddle.move(PADSPEED)
         if keys[K_l]:
-            blackPaddle.move(-PADSPEED)
+            secondPaddle.move(-PADSPEED)
         
         # Dot spawning functions either return None, or a list of dot objects
         newDotList = spawnSimultaneous(frameCount)
@@ -78,18 +87,18 @@ def main():
         # Collision Code
         i = 0
         for dot in dotList:
-            if whitePaddle.collide(dot.getPos()):
-                if (whitePaddle.getColor() == dot.getColor()):
+            if firstPaddle.collide(dot.getPos()):
+                if (firstPaddle.getColor() == dot.getColor()):
                     dotList.pop(i)
                 else:
                     terminate()
-            elif blackPaddle.collide(dot.getPos()):
-                if (blackPaddle.getColor() == dot.getColor()):
+            elif secondPaddle.collide(dot.getPos()):
+                if (secondPaddle.getColor() == dot.getColor()):
                     dotList.pop(i)
                 else:
                     terminate()
 
-            elif blackPit.collide(dot.getPos()):
+            elif centerPit.collide(dot.getPos()):
                 terminate()
             else:
                 dot.move()
@@ -100,9 +109,9 @@ def main():
         pygame.display.set_caption('Corcle Panic %d' % frameCount)
         DISPLAYSURF.fill(BGCOLOR)
         
-        blackPit.draw()
-        whitePaddle.draw()
-        blackPaddle.draw()
+        centerPit.draw()
+        firstPaddle.draw()
+        secondPaddle.draw()
 
         for dot in dotList:
             dot.draw()
@@ -246,8 +255,8 @@ def spawnSimultaneous(frameCount):
 
     if (frameCount%int(BASEFREQ - (frameCount**0.5)) == 0):
         firstSpawn = random.uniform(0, math.pi*2)
-        newDotList.append(spawnDot(WHITE, firstSpawn , DOTSPEED))
-        newDotList.append(spawnDot(BLACK, firstSpawn + random.uniform(PADLENGTH, math.pi*2 - PADLENGTH), DOTSPEED))
+        newDotList.append(spawnDot(COLOR1, firstSpawn , DOTSPEED))
+        newDotList.append(spawnDot(COLOR2, firstSpawn + random.uniform(PADLENGTH, math.pi*2 - PADLENGTH), DOTSPEED))
         return newDotList
     else:
         return None
