@@ -42,22 +42,27 @@ PADWIDTH = 5
 PITRADIUS = 25
 
 # Dot attributes
-DOTSPEED = 2
+DOTSPEED = 3
 BASEFREQ = 180
 
 NUMLINES = 20
+FONTSIZE = 50
 
 def main():
 
-    global DISPLAYSURF, FPSCLOCK
+    global DISPLAYSURF, FPSCLOCK, GAMEFONT
     
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
+    GAMEFONT = pygame.font.Font('freesansbold.ttf', FONTSIZE)
 
+    startScreen()    
+    
     while True:
     
-        runGame()
+        timeAlive = runGame()
+        endScreen(timeAlive)
 
 def runGame():
 
@@ -68,18 +73,13 @@ def runGame():
     dotList = []
     
     frameCount = 0
-    
+    timeAlive = frameCount / 60
+   
     while True:
     
         # Event Code
     
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                terminate()   
-            
-            if event.type == KEYUP:
-                if event.key == K_ESCAPE:
-                    terminate()
+        checkForQuit()
         
         keys = pygame.key.get_pressed()
         if keys[K_a]:
@@ -97,7 +97,7 @@ def runGame():
         if newDotList != None:
             for dot in newDotList:
                 dotList.append(dot)
-        
+
         # Collision Code
         i = 0
         for dot in dotList:
@@ -105,22 +105,22 @@ def runGame():
                 if (firstPaddle.getColor() == dot.getColor()):
                     dotList.pop(i)
                 else:
-                    return
+                    return timeAlive
             elif secondPaddle.collide(dot.getPos()):
                 if (secondPaddle.getColor() == dot.getColor()):
                     dotList.pop(i)
                 else:
-                    return
+                    return timeAlive
 
             elif centerPit.collide(dot.getPos()):
-                return
+                return timeAlive
             else:
                 dot.move()
             i += 1
         
         # Draw Code
         
-        pygame.display.set_caption('Corcle %d' % frameCount)
+        pygame.display.set_caption('Corcle %f' % timeAlive)
         
         DISPLAYSURF.fill(BGCOLOR)
         
@@ -137,6 +137,14 @@ def runGame():
         pygame.display.update()
         FPSCLOCK.tick(FPS)
         frameCount += 1
+        timeAlive = frameCount / 60
+        
+def startScreen():
+
+    pass
+    
+def endScreen(timeAlive):
+    pass
 
 class paddle(object):
     
@@ -264,6 +272,18 @@ def getAngle(pos):
 def terminate():
     pygame.quit()
     sys.exit()
+    
+def checkForQuit():
+    
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            terminate()   
+            
+        if event.type == KEYUP:
+            if event.key == K_ESCAPE:
+                terminate()
+                    
+        pygame.event.post(event)
     
 def spawnSimultaneous(frameCount):
     # if 
