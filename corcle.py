@@ -46,7 +46,7 @@ DOTSPEED = 3
 BASEFREQ = 180
 
 NUMLINES = 20
-FONTSIZE = 50
+FONTSIZE = 25
 
 def main():
 
@@ -64,6 +64,17 @@ def main():
         timeAlive = runGame()
         endScreen(timeAlive)
 
+def startScreen():
+
+    DISPLAYSURF.fill(BLACK)
+    textSurf = GAMEFONT.render("Welcome to the vidya game", False, BLUE)
+    textRect = textSurf.get_rect()
+    textRect.center = (WINDOWWIDTH//2, WINDOWHEIGHT//2)
+    DISPLAYSURF.blit(textSurf, textRect)
+    pygame.display.update()
+    
+    pygame.time.wait(2000)
+
 def runGame():
 
     firstPaddle = paddle(COLOR1, PADDIAMETER, PADLENGTH, PADWIDTH, math.pi)
@@ -80,6 +91,7 @@ def runGame():
         # Event Code
     
         checkForQuit()
+        pygame.event.get() # Clear event Queue
         
         keys = pygame.key.get_pressed()
         if keys[K_a]:
@@ -138,13 +150,17 @@ def runGame():
         FPSCLOCK.tick(FPS)
         frameCount += 1
         timeAlive = frameCount / 60
-        
-def startScreen():
-
-    pass
     
 def endScreen(timeAlive):
-    pass
+    
+    DISPLAYSURF.fill(BLACK)
+    scoreSurf = GAMEFONT.render("You stayed alive for %f seconds" % timeAlive, False, BLUE)
+    scoreRect = scoreSurf.get_rect()
+    scoreRect.center = (WINDOWWIDTH // 2, WINDOWHEIGHT // 2)
+    DISPLAYSURF.blit(scoreSurf, scoreRect)
+    
+    pygame.display.update()
+    pygame.time.wait(2000)
 
 class paddle(object):
     
