@@ -31,6 +31,7 @@ PITCOLOR = BLACK
 LINECOLOR = DARKBLUE
 COLOR1 = RED
 COLOR2 = GREEN
+FONTCOLOR = WHITE
 
 # Paddle attributes
 PADDIAMETER = 150
@@ -47,6 +48,7 @@ BASEFREQ = 180
 
 NUMLINES = 20
 FONTSIZE = 25
+WAITTIME = 300
 
 def main():
 
@@ -56,6 +58,7 @@ def main():
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
     GAMEFONT = pygame.font.Font('freesansbold.ttf', FONTSIZE)
+    pygame.display.set_caption('Corcle')
 
     startScreen()    
     
@@ -67,13 +70,25 @@ def main():
 def startScreen():
 
     DISPLAYSURF.fill(BLACK)
-    textSurf = GAMEFONT.render("Welcome to the vidya game", False, BLUE)
-    textRect = textSurf.get_rect()
-    textRect.center = (WINDOWWIDTH//2, WINDOWHEIGHT//2)
-    DISPLAYSURF.blit(textSurf, textRect)
-    pygame.display.update()
     
-    pygame.time.wait(2000)
+    textSurf = GAMEFONT.render("Use A-S and K-L to move the paddles", False, FONTCOLOR)
+    textRect = textSurf.get_rect()
+    textRect.center = (WINDOWWIDTH//2.2, WINDOWHEIGHT//4)
+    DISPLAYSURF.blit(textSurf, textRect)
+
+    pressSurf = GAMEFONT.render("Press any key to continue", False, FONTCOLOR)
+    pressRect = textSurf.get_rect()
+    pressRect.center = (WINDOWWIDTH//2, WINDOWHEIGHT//2)
+    DISPLAYSURF.blit(pressSurf, pressRect)
+    
+    pygame.display.update()
+    pygame.time.wait(WAITTIME)
+    pygame.event.get()
+
+    while True:    
+        checkForQuit()
+        if checkForKeyPress():
+            return
 
 def runGame():
 
@@ -130,10 +145,7 @@ def runGame():
                 dot.move()
             i += 1
         
-        # Draw Code
-        
-        pygame.display.set_caption('Corcle %f' % timeAlive)
-        
+        # Draw Code   
         DISPLAYSURF.fill(BGCOLOR)
         
         drawRadialLines(LINECOLOR, NUMLINES)
@@ -154,13 +166,24 @@ def runGame():
 def endScreen(timeAlive):
     
     DISPLAYSURF.fill(BLACK)
-    scoreSurf = GAMEFONT.render("You stayed alive for %f seconds" % timeAlive, False, BLUE)
+    scoreSurf = GAMEFONT.render("You stayed alive for %.2f seconds" % timeAlive, False, FONTCOLOR)
     scoreRect = scoreSurf.get_rect()
-    scoreRect.center = (WINDOWWIDTH // 2, WINDOWHEIGHT // 2)
+    scoreRect.center = (WINDOWWIDTH // 2, WINDOWHEIGHT // 4)
     DISPLAYSURF.blit(scoreSurf, scoreRect)
     
+    playSurf = GAMEFONT.render("Press any key to play again", False, FONTCOLOR)
+    playRect = playSurf.get_rect()
+    playRect.center = (WINDOWWIDTH // 2, WINDOWHEIGHT // 2)
+    DISPLAYSURF.blit(playSurf, playRect)
+    
     pygame.display.update()
-    pygame.time.wait(2000)
+    pygame.time.wait(WAITTIME)
+    
+    while True:
+        checkForQuit()
+        if checkForKeyPress():
+            return
+        
 
 class paddle(object):
     
@@ -300,6 +323,14 @@ def checkForQuit():
                 terminate()
                     
         pygame.event.post(event)
+
+def checkForKeyPress():
+    
+    for event in pygame.event.get():
+        if event.type == KEYUP:
+            return True
+            
+    return False
     
 def spawnSimultaneous(frameCount):
     # if 
