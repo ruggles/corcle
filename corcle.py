@@ -49,12 +49,18 @@ NUMLINES = 20
 
 def main():
 
-    global DISPLAYSURF
-
+    global DISPLAYSURF, FPSCLOCK
+    
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
+
+    while True:
     
+        runGame()
+
+def runGame():
+
     firstPaddle = paddle(COLOR1, PADDIAMETER, PADLENGTH, PADWIDTH, math.pi)
     secondPaddle = paddle(COLOR2, PADDIAMETER + PADWIDTH*2, PADLENGTH, PADWIDTH, 0)
     centerPit = pit(PITCOLOR, PITRADIUS)
@@ -70,6 +76,10 @@ def main():
         for event in pygame.event.get():
             if event.type == QUIT:
                 terminate()   
+            
+            if event.type == KEYUP:
+                if event.key == K_ESCAPE:
+                    terminate()
         
         keys = pygame.key.get_pressed()
         if keys[K_a]:
@@ -95,15 +105,15 @@ def main():
                 if (firstPaddle.getColor() == dot.getColor()):
                     dotList.pop(i)
                 else:
-                    terminate()
+                    return
             elif secondPaddle.collide(dot.getPos()):
                 if (secondPaddle.getColor() == dot.getColor()):
                     dotList.pop(i)
                 else:
-                    terminate()
+                    return
 
             elif centerPit.collide(dot.getPos()):
-                terminate()
+                return
             else:
                 dot.move()
             i += 1
