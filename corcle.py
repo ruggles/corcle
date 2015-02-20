@@ -48,7 +48,10 @@ BASEFREQ = 180
 
 NUMLINES = 20
 FONTSIZE = 25
-WAITTIME = 300
+WAITTIME = 500
+
+SPAWNINTERVAL = 900 # How often we change the spawn regime, in frames
+BLANKINTERVAL = 120 # Free time given between spawn regimes
 
 def main():
 
@@ -91,6 +94,7 @@ def startScreen():
             return
 
 def runGame():
+    global SPAWNCOLOR
 
     firstPaddle = paddle(COLOR1, PADDIAMETER, PADLENGTH, PADWIDTH, math.pi)
     secondPaddle = paddle(COLOR2, PADDIAMETER + PADWIDTH*2, PADLENGTH, PADWIDTH, 0)
@@ -120,7 +124,13 @@ def runGame():
             secondPaddle.move(-PADSPEED)
         
         # Dot spawning functions either return None, or a list of dot objects
-        newDotList = spawnSimultaneous(frameCount)
+        if frameCount%SPAWNINTERVAL == 0:
+            SPAWNCOLOR = random.choice((COLOR1, COLOR2))
+            dotSpawn = random.choice((spawnSimultaneous, spawnRandom, spawnSame, spawnAlternating))
+        
+        if (frameCount%SPAWNINTERVAL < SPAWNINTERVAL - BLANKINTERVAL):
+            newDotList = dotSpawn(frameCount)
+        
         if newDotList != None:
             for dot in newDotList:
                 dotList.append(dot)
@@ -178,6 +188,7 @@ def endScreen(timeAlive):
     
     pygame.display.update()
     pygame.time.wait(WAITTIME)
+    pygame.event.get()
     
     while True:
         checkForQuit()
@@ -343,6 +354,43 @@ def spawnSimultaneous(frameCount):
         return newDotList
     else:
         return None
+        
+def spawnRandom(frameCount):
+
+    newDotList = []
+    
+    if (frameCount%int(BASEFREQ/1.5 - (frameCount**0.5)) == 0):
+        newDotList.append(spawnDot(random.choice((COLOR1, COLOR2)), random.uniform(0, math.pi*2), DOTSPEED))
+        return newDotList
+    
+    return None
+    
+def spawnSame(frameCount):
+    newDotList = []
+
+    if (frameCount%int(BASEFREQ/2 - (frameCount**0.5)) == 0):
+        newDotList.append(spawnDot(SPAWNCOLOR, random.uniform(0, math.pi*2), DOTSPEED))
+        return newDotList
+        
+    return None
+
+def spawnAlternating(frameCount):
+
+    global SPAWNCOLOR
+    newDotList = []
+    
+    if (frameCount%int(BASEFREQ/1.7 - (frameCount**0.5)) == 0):
+    
+        if SPAWNCOLOR == COLOR1:
+            SPAWNCOLOR = COLOR2
+        else:
+            SPAWNCOLOR = COLOR1
+    
+        newDotList.append(spawnDot(SPAWNCOLOR, random.uniform(0, math.pi*2), DOTSPEED))
+        
+        return newDotList
+    
+    return None
         
 def drawRadialLines(color, numLines):
     # Draws numLines number of lines radiating from center of screen
