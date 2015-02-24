@@ -7,7 +7,7 @@ Nicholas Ruggles
 '''
 
 from __future__ import division
-import pygame, sys, math, random
+import pygame, sys, math, random, os
 from pygame.locals import *
 
 FPS = 60
@@ -57,10 +57,18 @@ def main():
 
     global DISPLAYSURF, FPSCLOCK, GAMEFONT
     
+    # Font shit
+    directory =  os.path.abspath(os.path.dirname(__file__))
+    dataDir = os.path.join(directory, 'data')
+    fontName = 'FreeSansBold.ttf'
+    myFontFile = resource_path(os.path.join(dataDir, fontName))
+    
+    print myFontFile
+    
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
-    GAMEFONT = pygame.font.Font('freesansbold.ttf', FONTSIZE)
+    GAMEFONT = pygame.font.Font( myFontFile, FONTSIZE)
     pygame.display.set_caption('Corcle')
 
     startScreen()    
@@ -408,5 +416,10 @@ def drawRadialLines(color, numLines):
         
         pygame.draw.line(DISPLAYSURF, color, center, (endX, endY))
         
+def resource_path(relative):
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, relative)
+    return os.path.join(relative)
+
 if __name__ == '__main__':
     main()
