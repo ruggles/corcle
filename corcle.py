@@ -7,7 +7,7 @@ Nicholas Ruggles
 '''
 
 from __future__ import division
-import pygame, sys, math, random, os
+import pygame, sys, math, random, os, time
 from pygame.locals import *
 
 FPS = 60
@@ -44,7 +44,7 @@ PITRADIUS = 25
 
 # Dot attributes
 DOTSPEED = 3
-BASEFREQ = 180
+BASEFREQ = 160
 
 NUMLINES = 20
 FONTSIZE = 25
@@ -111,6 +111,7 @@ def runGame():
     
     frameCount = 0
     timeAlive = frameCount / 60
+    lastSpawnTime = time.time()
    
     while True:
     
@@ -136,9 +137,10 @@ def runGame():
             dotSpawn = random.choice((spawnSimultaneous, spawnRandom, spawnSame, spawnAlternating))
         
         if (frameCount%SPAWNINTERVAL < SPAWNINTERVAL - BLANKINTERVAL):
-            newDotList = dotSpawn(frameCount)
+            newDotList = dotSpawn(frameCount, time.time() - lastSpawnTime)
         
         if newDotList != None:
+            lastSpawnTime = time.time()
             for dot in newDotList:
                 dotList.append(dot)
 
@@ -350,11 +352,13 @@ def checkForKeyPress():
             
     return False
     
-def spawnSimultaneous(frameCount):
-    # if 
-    newDotList = []
+def spawnSimultaneous(frameCount, timeSinceSpawn):
 
-    if (frameCount%int(BASEFREQ - (frameCount**0.5)) == 0):
+    newDotList = []
+    
+    spawnThreshold = (BASEFREQ - (frameCount**0.5) )/FPS
+
+    if timeSinceSpawn > spawnThreshold:
         firstSpawn = random.uniform(0, math.pi*2)
         newDotList.append(spawnDot(COLOR1, firstSpawn , DOTSPEED))
         newDotList.append(spawnDot(COLOR2, firstSpawn + random.uniform(PADLENGTH, math.pi*2 - PADLENGTH), DOTSPEED))
@@ -362,31 +366,38 @@ def spawnSimultaneous(frameCount):
     else:
         return None
         
-def spawnRandom(frameCount):
+def spawnRandom(frameCount, timeSinceSpawn):
 
     newDotList = []
     
-    if (frameCount%int(BASEFREQ/1.5 - (frameCount**0.5)) == 0):
+    spawnThreshold = (BASEFREQ/1.6 - (frameCount**0.5) )/FPS
+    
+    if timeSinceSpawn > spawnThreshold:
         newDotList.append(spawnDot(random.choice((COLOR1, COLOR2)), random.uniform(0, math.pi*2), DOTSPEED))
         return newDotList
     
     return None
     
-def spawnSame(frameCount):
-    newDotList = []
+def spawnSame(frameCount, timeSinceSpawn):
 
-    if (frameCount%int(BASEFREQ/2 - (frameCount**0.5)) == 0):
+    newDotList = []
+    
+    spawnThreshold = (BASEFREQ/2 - (frameCount**0.5))/FPS
+
+    if timeSinceSpawn > spawnThreshold:
         newDotList.append(spawnDot(SPAWNCOLOR, random.uniform(0, math.pi*2), DOTSPEED))
         return newDotList
         
     return None
 
-def spawnAlternating(frameCount):
+def spawnAlternating(frameCount, timeSinceSpawn):
 
     global SPAWNCOLOR
     newDotList = []
     
-    if (frameCount%int(BASEFREQ/1.7 - (frameCount**0.5)) == 0):
+    spawnThreshold = ( BASEFREQ/1.7 - (frameCount**0.5)) /FPS
+    
+    if timeSinceSpawn > spawnThreshold:
     
         if SPAWNCOLOR == COLOR1:
             SPAWNCOLOR = COLOR2
