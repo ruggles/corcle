@@ -57,13 +57,12 @@ def main():
 
     global DISPLAYSURF, FPSCLOCK, GAMEFONT
     
-    # Font shit
-    directory =  os.path.abspath(os.path.dirname(__file__))
-    dataDir = os.path.join(directory, 'data')
+    # Font junk
+    dataDir = 'data'
     fontName = 'FreeSansBold.ttf'
     myFontFile = resource_path(os.path.join(dataDir, fontName))
     
-    print myFontFile
+    # print myFontFile
     
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
