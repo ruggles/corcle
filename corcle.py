@@ -7,7 +7,7 @@ Nicholas Ruggles
 '''
 
 from __future__ import division
-import pygame, sys, math, random, os, time
+import pygame, sys, math, random, os, time, copy
 from pygame.locals import *
 
 FPS = 60
@@ -112,6 +112,9 @@ def runGame():
     frameCount = 0
     timeAlive = frameCount / 60
     lastSpawnTime = time.time()
+    
+    regimeList = [spawnSimultaneous, spawnRandom, spawnSame, spawnAlternating]
+    dotSpawn = random.choice(regimeList)
    
     while True:
     
@@ -134,7 +137,9 @@ def runGame():
         # Dot spawning functions either return None, or a list of dot objects
         if frameCount%SPAWNINTERVAL == 0:
             SPAWNCOLOR = random.choice((COLOR1, COLOR2))
-            dotSpawn = random.choice((spawnSimultaneous, spawnRandom, spawnSame, spawnAlternating))
+            spawnRegime = copy.copy(regimeList)
+            spawnRegime.remove(dotSpawn)
+            dotSpawn = random.choice(spawnRegime)
         
         if (frameCount%SPAWNINTERVAL < SPAWNINTERVAL - BLANKINTERVAL):
             newDotList = dotSpawn(frameCount, time.time() - lastSpawnTime)
