@@ -44,7 +44,7 @@ PITRADIUS = 25
 
 # Dot attributes
 DOTSPEED = 3
-BASEFREQ = 160
+BASEFREQ = 180
 
 NUMLINES = 20
 FONTSIZE = 25
@@ -115,6 +115,8 @@ def runGame():
     
     regimeList = [spawnSimultaneous, spawnRandom, spawnSame, spawnAlternating]
     dotSpawn = random.choice(regimeList)
+    degrees = 0
+    rotationSpeed = 0
    
     while True:
     
@@ -140,6 +142,7 @@ def runGame():
             spawnRegime = copy.copy(regimeList)
             spawnRegime.remove(dotSpawn)
             dotSpawn = random.choice(spawnRegime)
+            rotationSpeed = (random.uniform(0.75, 1)) * ((frameCount + 900) / 900) * random.choice((-1, 1))
         
         if (frameCount%SPAWNINTERVAL < SPAWNINTERVAL - BLANKINTERVAL):
             newDotList = dotSpawn(frameCount, time.time() - lastSpawnTime)
@@ -179,6 +182,9 @@ def runGame():
 
         for dot in dotList:
             dot.draw()
+        
+        degrees +=  (math.sin((frameCount%360)/360) - 0.5) * rotationSpeed
+        rotateScreen(degrees)    
             
         # Update Screen & wait for next frame
         
@@ -430,6 +436,14 @@ def drawRadialLines(color, numLines):
         endY = center[1] + WINDOWHEIGHT*math.sin(angle)
         
         pygame.draw.line(DISPLAYSURF, color, center, (endX, endY))
+
+def rotateScreen(degrees):
+    
+    rotatedSurf = pygame.transform.rotate(DISPLAYSURF, degrees)
+    rotatedRect = rotatedSurf.get_rect()
+    rotatedRect.center = (WINDOWWIDTH // 2, WINDOWHEIGHT // 2)
+    
+    DISPLAYSURF.blit(rotatedSurf, rotatedRect)
         
 def resource_path(relative):
     if hasattr(sys, "_MEIPASS"):
