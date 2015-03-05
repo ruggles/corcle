@@ -55,7 +55,7 @@ BLANKINTERVAL = 120 # Free time given between spawn regimes
 
 def main():
 
-    global DISPLAYSURF, FPSCLOCK, GAMEFONT
+    global DISPLAYSURF, DRAWSURF, FPSCLOCK, GAMEFONT
     
     # Font junk
     dataDir = 'data'
@@ -68,6 +68,8 @@ def main():
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
     GAMEFONT = pygame.font.Font( myFontFile, FONTSIZE)
+    DRAWSURF = pygame.Surface((WINDOWWIDTH, WINDOWWIDTH))
+    
     pygame.display.set_caption('Corcle')
 
     startScreen()    
@@ -173,18 +175,29 @@ def runGame():
             i += 1
         
         # Draw Code   
-        DISPLAYSURF.fill(BGCOLOR)
+        drawRect = DRAWSURF.get_rect()
+        drawRect.center = (WINDOWWIDTH // 2, WINDOWHEIGHT // 2)
+        
+        DRAWSURF.fill(BGCOLOR)
         
         drawRadialLines(LINECOLOR, NUMLINES)
+        
         centerPit.draw()
+
         firstPaddle.draw()
         secondPaddle.draw()
+
+        
 
         for dot in dotList:
             dot.draw()
         
-        degrees +=  (math.sin((frameCount%360)/360) - 0.5) * rotationSpeed
-        rotateScreen(degrees)    
+        
+        
+        degrees +=  (math.sin((frameCount%450)/450) - 0.5) * rotationSpeed
+        rotateScreen(degrees) 
+        
+        DISPLAYSURF.blit(DRAWSURF, drawRect)   
             
         # Update Screen & wait for next frame
         
@@ -232,10 +245,11 @@ class paddle(object):
             self.arcPos += 2*math.pi
         
         self.circleRect = pygame.Rect((WINDOWWIDTH - diameter)/2, (WINDOWHEIGHT - diameter)/2, diameter, diameter)
+        self.drawRect = pygame.Rect((WINDOWWIDTH - diameter)/2, (WINDOWWIDTH - diameter)/2, diameter, diameter)
     
-    def draw(self):
+    def draw(self):        
         
-        pygame.draw.arc(DISPLAYSURF, self.color, self.circleRect, self.arcPos, self.arcPos + self.arcLength, self.arcWidth)
+        pygame.draw.arc(DRAWSURF, self.color, self.drawRect, self.arcPos, self.arcPos + self.arcLength, self.arcWidth)
         
     def move(self, arcDelta):
         
@@ -274,7 +288,7 @@ class pit(object):
         
     def draw(self):
         
-        pygame.draw.circle(DISPLAYSURF, self.color, self.pitPos, self.radius)
+        pygame.draw.circle(DRAWSURF, self.color, (self.pitPos[0] , self.pitPos[0]) , self.radius)
 
     def collide(self, pos):
         # Returns True if x, y in pit
@@ -294,10 +308,11 @@ class dot(object):
         self.speed = speed
         
         self.dotRect = (self.xPos, self.yPos, 10, 10)
+        self.drawRect = (self.xPos, self.yPos + (WINDOWWIDTH - WINDOWHEIGHT)//2 , 10, 10)
         
     def draw(self):
         
-        pygame.draw.rect(DISPLAYSURF, self.color, self.dotRect)
+        pygame.draw.rect(DRAWSURF, self.color, self.drawRect)
         
     def move(self):
     
@@ -305,6 +320,7 @@ class dot(object):
         self.yPos = self.yPos - self.speed * math.sin(self.direction)
         
         self.dotRect = (self.xPos, self.yPos, 10, 10)
+        self.drawRect = (self.xPos, self.yPos + (WINDOWWIDTH - WINDOWHEIGHT)//2 , 10, 10)
         
     def getPos(self):
         
@@ -427,7 +443,7 @@ def drawRadialLines(color, numLines):
     assert numLines > 0
     
     lineDiff = 2 * math.pi / numLines
-    center = (WINDOWWIDTH // 2, WINDOWHEIGHT // 2)
+    center = (WINDOWWIDTH // 2, WINDOWWIDTH // 2)
     angle = 0
     
     for i in range(numLines) :
@@ -435,15 +451,15 @@ def drawRadialLines(color, numLines):
         endX = center[0] + WINDOWHEIGHT*math.cos(angle)
         endY = center[1] + WINDOWHEIGHT*math.sin(angle)
         
-        pygame.draw.line(DISPLAYSURF, color, center, (endX, endY))
+        pygame.draw.line(DRAWSURF, color, center, (endX, endY))
 
 def rotateScreen(degrees):
     
-    rotatedSurf = pygame.transform.rotate(DISPLAYSURF, degrees)
+    rotatedSurf = pygame.transform.rotate(DRAWSURF, degrees)
     rotatedRect = rotatedSurf.get_rect()
-    rotatedRect.center = (WINDOWWIDTH // 2, WINDOWHEIGHT // 2)
+    rotatedRect.center = (WINDOWWIDTH // 2, WINDOWWIDTH // 2)
     
-    DISPLAYSURF.blit(rotatedSurf, rotatedRect)
+    DRAWSURF.blit(rotatedSurf, rotatedRect)
         
 def resource_path(relative):
     if hasattr(sys, "_MEIPASS"):
