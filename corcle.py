@@ -11,8 +11,8 @@ import pygame, sys, math, random, os, time, copy
 from pygame.locals import *
 
 FPS = 60
-WINDOWWIDTH = 800
-WINDOWHEIGHT = 600
+WINDOWWIDTH = 1000
+WINDOWHEIGHT = 700
 
 #                  R    G    B
 DARKTURQUOISE = (  3,  54,  73)
@@ -55,7 +55,7 @@ BLANKINTERVAL = 120 # Free time given between spawn regimes
 
 def main():
 
-    global DISPLAYSURF, DRAWSURF, FPSCLOCK, GAMEFONT
+    global DISPLAYSURF, FPSCLOCK, GAMEFONT
     
     # Font junk
     dataDir = 'data'
@@ -68,7 +68,6 @@ def main():
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
     GAMEFONT = pygame.font.Font( myFontFile, FONTSIZE)
-    DRAWSURF = pygame.Surface((WINDOWWIDTH, WINDOWWIDTH))
     
     pygame.display.set_caption('Corcle')
 
@@ -144,7 +143,7 @@ def runGame():
             spawnRegime = copy.copy(regimeList)
             spawnRegime.remove(dotSpawn)
             dotSpawn = random.choice(spawnRegime)
-            rotationSpeed = (random.uniform(0.75, 1)) * ((frameCount + 900) / 900) * random.choice((-1, 1))
+            rotationSpeed = (random.uniform(0.75, 1)) * ((frameCount + 1800) / 1800) * random.choice((-1, 1))
         
         if (frameCount%SPAWNINTERVAL < SPAWNINTERVAL - BLANKINTERVAL):
             newDotList = dotSpawn(frameCount, time.time() - lastSpawnTime)
@@ -175,30 +174,26 @@ def runGame():
             i += 1
         
         # Draw Code   
-        drawRect = DRAWSURF.get_rect()
-        drawRect.center = (WINDOWWIDTH // 2, WINDOWHEIGHT // 2)
         
-        DRAWSURF.fill(BGCOLOR)
+        DISPLAYSURF.fill(BGCOLOR)
         
-        drawRadialLines(LINECOLOR, NUMLINES)
+        degrees +=  (math.sin((frameCount%1000)/1000) - 0.5) * rotationSpeed
+        
+        rotAngle = degrees*math.pi/180
+        
+        drawRadialLines(LINECOLOR, NUMLINES, rotAngle)
         
         centerPit.draw()
 
-        firstPaddle.draw()
-        secondPaddle.draw()
-
+        firstPaddle.draw(rotAngle)
+        secondPaddle.draw(rotAngle)
         
+        # Framerate, for debug purposes
+        #pygame.display.set_caption('%d' % FPSCLOCK.get_fps() )
 
         for dot in dotList:
-            dot.draw()
-        
-        
-        
-        degrees +=  (math.sin((frameCount%450)/450) - 0.5) * rotationSpeed
-        rotateScreen(degrees) 
-        
-        DISPLAYSURF.blit(DRAWSURF, drawRect)   
-            
+            dot.draw(rotAngle)
+
         # Update Screen & wait for next frame
         
         pygame.display.update()
@@ -245,11 +240,10 @@ class paddle(object):
             self.arcPos += 2*math.pi
         
         self.circleRect = pygame.Rect((WINDOWWIDTH - diameter)/2, (WINDOWHEIGHT - diameter)/2, diameter, diameter)
-        self.drawRect = pygame.Rect((WINDOWWIDTH - diameter)/2, (WINDOWWIDTH - diameter)/2, diameter, diameter)
     
-    def draw(self):        
+    def draw(self, rotAngle=0):        
         
-        pygame.draw.arc(DRAWSURF, self.color, self.drawRect, self.arcPos, self.arcPos + self.arcLength, self.arcWidth)
+        pygame.draw.arc(DISPLAYSURF, self.color, self.circleRect, self.arcPos - rotAngle, self.arcPos + self.arcLength - rotAngle, self.arcWidth)
         
     def move(self, arcDelta):
         
@@ -288,7 +282,7 @@ class pit(object):
         
     def draw(self):
         
-        pygame.draw.circle(DRAWSURF, self.color, (self.pitPos[0] , self.pitPos[0]) , self.radius)
+        pygame.draw.circle(DISPLAYSURF, self.color, self.pitPos, self.radius)
 
     def collide(self, pos):
         # Returns True if x, y in pit
@@ -308,11 +302,11 @@ class dot(object):
         self.speed = speed
         
         self.dotRect = (self.xPos, self.yPos, 10, 10)
-        self.drawRect = (self.xPos, self.yPos + (WINDOWWIDTH - WINDOWHEIGHT)//2 , 10, 10)
         
-    def draw(self):
+    def draw(self, rotAngle=0):
         
-        pygame.draw.rect(DRAWSURF, self.color, self.drawRect)
+        self.updateDrawRect(rotAngle)
+        pygame.draw.rect(DISPLAYSURF, self.color, self.drawRect)
         
     def move(self):
     
@@ -320,7 +314,18 @@ class dot(object):
         self.yPos = self.yPos - self.speed * math.sin(self.direction)
         
         self.dotRect = (self.xPos, self.yPos, 10, 10)
-        self.drawRect = (self.xPos, self.yPos + (WINDOWWIDTH - WINDOWHEIGHT)//2 , 10, 10)
+        
+    def updateDrawRect(self, rotAngle):
+        
+        angle = getAngle((self.xPos, self.yPos))
+        centerX = WINDOWWIDTH // 2
+        centerY = WINDOWHEIGHT // 2
+        radius = ( (self.xPos + 5 - centerX )**2 + (self.yPos + 5 - centerY )**2 )**0.5
+        
+        drawX = math.cos(angle - rotAngle) * radius + centerX
+        drawY = - math.sin(angle - rotAngle) * radius + centerY
+        
+        self.drawRect = pygame.Rect(drawX - 5, drawY - 5, 10, 10)
         
     def getPos(self):
         
@@ -437,30 +442,21 @@ def spawnAlternating(frameCount, timeSinceSpawn):
     
     return None
         
-def drawRadialLines(color, numLines):
+def drawRadialLines(color, numLines, rotAngle=0):
     # Draws numLines number of lines radiating from center of screen
     
     assert numLines > 0
     
     lineDiff = 2 * math.pi / numLines
-    center = (WINDOWWIDTH // 2, WINDOWWIDTH // 2)
-    angle = 0
+    center = (WINDOWWIDTH // 2, WINDOWHEIGHT // 2)
     
     for i in range(numLines) :
-        angle = lineDiff * i
+        angle = lineDiff * i + rotAngle
         endX = center[0] + WINDOWHEIGHT*math.cos(angle)
         endY = center[1] + WINDOWHEIGHT*math.sin(angle)
         
-        pygame.draw.line(DRAWSURF, color, center, (endX, endY))
+        pygame.draw.line(DISPLAYSURF, color, center, (endX, endY))
 
-def rotateScreen(degrees):
-    
-    rotatedSurf = pygame.transform.rotate(DRAWSURF, degrees)
-    rotatedRect = rotatedSurf.get_rect()
-    rotatedRect.center = (WINDOWWIDTH // 2, WINDOWWIDTH // 2)
-    
-    DRAWSURF.blit(rotatedSurf, rotatedRect)
-        
 def resource_path(relative):
     if hasattr(sys, "_MEIPASS"):
         return os.path.join(sys._MEIPASS, relative)
