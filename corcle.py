@@ -43,7 +43,7 @@ PADWIDTH = 5
 PITRADIUS = 25
 
 # Dot attributes
-DOTSPEED = 3
+DOTSPEED = 3.5
 BASEFREQ = 180
 
 NUMLINES = 20
@@ -143,7 +143,7 @@ def runGame():
             spawnRegime = copy.copy(regimeList)
             spawnRegime.remove(dotSpawn)
             dotSpawn = random.choice(spawnRegime)
-            rotationSpeed = (random.uniform(0.75, 1)) * ((frameCount + 1800) / 1800) * random.choice((-1, 1))
+            rotationSpeed = (random.uniform(0.25, 0.5)) * ((frameCount + 1800) / 1800) * random.choice((-1, 1))
         
         if (frameCount%SPAWNINTERVAL < SPAWNINTERVAL - BLANKINTERVAL):
             newDotList = dotSpawn(frameCount, time.time() - lastSpawnTime)
